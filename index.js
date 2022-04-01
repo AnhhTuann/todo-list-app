@@ -1,81 +1,67 @@
-const inputBox = document.querySelector('.inputField input');
-const addButton = document.querySelector('.inputField button');
-const todoList = document.querySelector('.todoList');
-const deleteButton = document.querySelector('.footer button');
+window.addEventListener('load', () => {
+  const form = document.querySelector('#new-task-form');
+  const input = document.querySelector('#new-task-input');
+  const list_el = document.querySelector('#tasks');
 
-inputBox.onkeyup = () => {
-  //Lấy giá trị khi người dùng nhập vào
-  let userEnterText = inputBox.value;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-  //Nếu người dùng nhập vào giá trị mà không phải khoảng trắng
-  if (userEnterText.trim() != 0) {
-    // Thì nút add sẽ sáng lên
-    //Trường hợp nếu nhập toàn khoảng trắng thì sẽ không sáng lên
-    addButton.classList.add('active');
-  } else {
-    //Ngược lại thì nút add sẽ tắt
-    addButton.classList.remove('active');
-  }
-};
+    const task = input.value;
 
-showTasks();
+    if (!task) {
+      alert('Please fill out a task');
+      return;
+    }
 
-//Hàm thao tác với nút add
-addButton.onclick = () => {
-  //Khi người dùng nhấn vào nút add
-  //Lấy giá trị người dùng nhập vào
-  let userEnterText = inputBox.value;
-  //Lấy localStorage (biến lưu trữ cục bộ)
-  let getLocalStorageData = localStorage.getItem('New todo');
-  if (getLocalStorageData == null) {
-    //Nếu localStorage chưa có dữ liệu thì tạo mảng rỗng
-    listArray = [];
-  } else {
-    //Nếu localStorage đã có dữ liệu thì chuyển JSON dạng từ string sang Object
-    listArray = JSON.parse(getLocalStorageData);
-  }
-  //Đưa giá trị vào mảng
-  listArray.push(userEnterText);
-  //Chuyển JSON từ dạng Object sang dạng string
-  localStorage.setItem('New todo', JSON.stringify(listArray));
-  showTasks();
-  addButton.classList.remove('active');
-};
+    const task_el = document.createElement('div');
+    task_el.classList.add('task');
 
-function showTasks() {
-  let getLocalStorageData = localStorage.getItem('New todo');
-  if (getLocalStorageData == null) {
-    //Nếu localStorage chưa có dữ liệu thì tạo mảng rỗng
-    listArray = [];
-  } else {
-    //Nếu localStorage đã có dữ liệu thì chuyển JSON dạng từ string sang Object
-    listArray = JSON.parse(getLocalStorageData);
-  }
-  const pendingTasksNumb = document.querySelector('.pendingTasks');
-  pendingTasksNumb.textContent = listArray.length;
-  if (listArray.length > 0) {
-    deleteButton.classList.add('active');
-  } else {
-    deleteButton.classList.remove('active');
-  }
-  let newLiTag = '';
-  listArray.forEach((element, index) => {
-    newLiTag += `<li>${element}<span class="icon" onclick="deleteTask(${index})"><i class="fas fa-trash"></i></span></li>`;
+    const task_content_el = document.createElement('div');
+    task_content_el.classList.add('content');
+
+    task_el.appendChild(task_content_el);
+
+    const task_input_el = document.createElement('input');
+    task_input_el.classList.add('text');
+    task_input_el.type = 'text';
+    task_input_el.value = task;
+    task_input_el.setAttribute('readonly', 'readonly');
+
+    task_content_el.appendChild(task_input_el);
+
+    const task_actions_el = document.createElement('div');
+    task_actions_el.classList.add('actions');
+
+    const task_edit_el = document.createElement('button');
+    task_edit_el.classList.add('edit');
+    task_edit_el.innerHTML = 'Edit';
+
+    const task_delete_el = document.createElement('button');
+    task_delete_el.classList.add('delete');
+    task_delete_el.innerHTML = 'Delete';
+
+    task_actions_el.appendChild(task_edit_el);
+    task_actions_el.appendChild(task_delete_el);
+
+    task_el.appendChild(task_actions_el);
+
+    list_el.appendChild(task_el);
+
+    input.value = '';
+
+    task_edit_el.addEventListener('click', () => {
+      if (task_edit_el.innerText.toLowerCase() == 'edit') {
+        task_input_el.removeAttribute('readonly');
+        task_input_el.focus();
+        task_edit_el.innerText = 'Save';
+      } else {
+        task_input_el.setAttribute('readonly', 'readonly');
+        task_edit_el.innerText = 'Edit';
+      }
+    });
+
+    task_delete_el.addEventListener('click', () => {
+      list_el.removeChild(task_el);
+    });
   });
-  todoList.innerHTML = newLiTag;
-  inputBox.value = '';
-}
-
-function deleteTask(index) {
-  let getLocalStorageData = localStorage.getItem('New todo');
-  listArray = JSON.parse(getLocalStorageData);
-  listArray.splice(index, 1);
-  listArray.setItem('New todo', JSON.stringify(listArray));
-  showTasks();
-}
-
-deleteButton.onclick = () => {
-  listArray = [];
-  localStorage.setItem('New todo', JSON.stringify(listArray));
-  showTasks();
-};
+});
